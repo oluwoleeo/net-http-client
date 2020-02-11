@@ -18,8 +18,8 @@ namespace AlgoTest
                 .BuildServiceProvider();
         static void Main(string[] args)
         {
-            //openAndClosePrices("1-January-2000", "22-February-2000", "Monday").Wait();
-            Console.WriteLine(largestMatrix(new List<List<int>>()
+            openAndClosePrices("1-January-2000", "22-February-2000", "Monday").Wait();
+            /* Console.WriteLine(largestMatrix(new List<List<int>>()
             {
                 new List<int>(){1,1,1,1,1},
                 new List<int>(){1,1,1,0,0},
@@ -29,8 +29,8 @@ namespace AlgoTest
                 /*new List<int>(){1,1,0,1,0},
                 new List<int>(){0,1,1,1,0},
                 new List<int>(){1,1,1,1,0},
-                new List<int>(){0,1,1,1,1}*/
-            }));
+                new List<int>(){0,1,1,1,1}
+            })); */
         }
 
         public static int largestMatrix(List<List<int>> arr)
@@ -101,21 +101,27 @@ namespace AlgoTest
                         //string response = client.DownloadString(path);
                         string response = await client.GetStringAsync(path);
                         //var content = await response.Content.ReadAsStringAsync();
-                        JObject jObject = JObject.Parse(response);
-                        JArray jArray = (JArray)jObject["data"];
 
-                        /*the first Where LINQ operation tries to reduce the number of records to check by
-                        filtering out the records that don't have the same year as the dates specified 
-                        in the function's arguments*/
+                        /* JObject jObject = JObject.Parse(response);
+                        JArray jArray = (JArray)jObject["data"]; */
 
-                        var records = jArray.Select(x => new DataRecord
+                        /* var records = jArray.Select(x => new DataRecord
                         {
                             Date = (string)x["date"],
                             Open = (double)x["open"],
                             High = (double)x["high"],
                             Low = (double)x["low"],
                             Close = (double)x["close"]
-                        }).Where(x => int.Parse(x.Date.Split("-")[2]) >= int.Parse(d1[2]) && int.Parse(x.Date.Split("-")[2]) <= int.Parse(d2[2]))
+                        }).Where... */
+
+                        Stock stockRecs = JsonConvert.DeserializeObject<Stock>(response);
+                        IEnumerable<DataRecord> dataRecords = stockRecs.Data;
+
+                        /*the first Where LINQ operation tries to reduce the number of records to check by
+                        filtering out the records that don't have the same year as the dates specified 
+                        in the function's arguments*/
+
+                        var records = dataRecords.Where(x => int.Parse(x.Date.Split("-")[2]) >= int.Parse(d1[2]) && int.Parse(x.Date.Split("-")[2]) <= int.Parse(d2[2]))
                         .Where(x => new DateTime(int.Parse(x.Date.Split("-")[2]), monthPair[x.Date.Split("-")[1]], int.Parse(x.Date.Split("-")[0])) >= date1 && new DateTime(int.Parse(x.Date.Split("-")[2]), monthPair[x.Date.Split("-")[1]], int.Parse(x.Date.Split("-")[0])) <= date2 && new DateTime(int.Parse(x.Date.Split("-")[2]), monthPair[x.Date.Split("-")[1]], int.Parse(x.Date.Split("-")[0])).ToLongDateString().StartsWith(weekDay))
                         .Select(x => new {
                             x.Date,
